@@ -1,6 +1,6 @@
 (function(){
 
-  var base_url = "https://chat.tunnlr.xyz";
+  var base_url = "https://chat.dev";
   var config = {
     admin_name: "Aaron Parecki",
     status: base_url+"/chat/active",
