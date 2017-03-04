@@ -1,0 +1,35 @@
+# Define a secret to use for session tokens
+secret: ..............................
+
+# Define the port and host this API will listen on
+api:
+  port: 9009
+  host: 0.0.0.0
+
+# Your IRC server settings
+irc:
+  server: dev
+  host: localhost
+  port: 6667
+  password: 
+  nick: Clippy
+  username: Clippy
+
+# Automatically-generated channel names will begin with this prefix
+channel_prefix: "apk"
+
+# Guest nicknames will be prefixed with this
+# (TODO: guest identity is not yet implemented)
+nick_prefix: "guest"
+
+# Your nick will be sent an invite as new channels are created
+admin_nick: "aaronpk"
+
+# The admin channel will be notified when new guests join
+admin_channel: "#aaronparecki"
+
+# The URL that the push-stream module is configured at
+streaming_pub: "https://chat.dev/streaming/pub"
+
+# A prefix to use for Redis keys
+redis_prefix: "example"

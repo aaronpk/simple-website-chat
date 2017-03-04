@@ -1,0 +1,9 @@
+source 'https://rubygems.org/'
+
+gem 'sinatra', :require => 'sinatra/base'
+gem 'puma'
+gem 'httparty'
+gem 'cinch'
+gem 'celluloid-io', require: ['celluloid/current', 'celluloid/io']
+gem 'jwt'
+gem 'redis'
