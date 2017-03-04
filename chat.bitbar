@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo 💬
+echo ---
+date
+curl -X POST https://chat.dev/chat/online >> /dev/null 2>&1
