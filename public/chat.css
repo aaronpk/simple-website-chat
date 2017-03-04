@@ -1,0 +1,152 @@
+
+.chat-button.hidden {
+  display: none;
+}
+
+.chat-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+
+  box-shadow: 3px 3px 12px 0px rgba(0,0,0,0.52);
+
+  background: #1c95e6;
+  border: 1px #2a88c7 solid;
+
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+
+  cursor: pointer;
+}
+
+.chat-button svg {
+  width: 45px;
+  position: relative;
+  top: 7px;
+  left: 7px;
+}
+
+.chat-widget {
+  position: fixed;
+  bottom: 0px;
+  right: 20px;
+
+  z-index: 1000;
+
+  background: #fff;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, .3);
+  border-radius: 3px 3px 0px 0px;
+  -moz-border-radius: 3px 3px 0px 0px;
+  -webkit-border-radius: 3px 3px 0px 0px;  
+
+  height: 300px;
+  width: 240px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-widget-header {
+  background: #F6F7F9;
+  box-shadow: 0 1px 1px 0px rgba(0,0,0,0.2);
+  z-index: 1001;
+  flex: 0 0;
+  padding: 0px 7px;
+  font-weight: bold;
+  color: #4b4f56;
+  font-size: 12px;
+  line-height: 26px;
+}
+
+#chat-widget-online-status {
+  background-color: #77d077;
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  border: 1px #54b554 solid;
+  display: inline-block;
+}
+
+.chat-widget-header > div {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.chat-widget-header .left {
+  flex: 1 0;
+}
+
+.chat-widget-header .right {
+  flex: 0 0;
+  font-size: 20px;
+  align-items: baseline;
+  line-height: 20px;
+}
+
+.chat-widget-header .right a {
+  color: #777c86;
+}
+.chat-widget-header .right a:hover {
+  color: #989da5;
+}
+
+.chat-widget-messages {
+  background: #fff;
+  flex: 1 0;
+  overflow-y: scroll;
+  padding: 0;
+}
+
+.chat-widget-messages ul {
+  list-style-type: none;
+  margin: 6px 10px 0 10px;
+  padding: 0;
+}
+
+.chat-widget-messages li {
+  margin-bottom: 5px;
+}
+
+.chat-widget-messages li.mine {
+  text-align: right;
+}
+
+.chat-widget-messages li div {
+  border-radius: 7px;
+  padding: 3px 6px;
+  display: inline-block;
+}
+
+.chat-widget-messages li.mine div {
+  background: #3085CB;
+  color: white;
+}
+
+.chat-widget-messages li.pending div {
+  background: #a2bbd0;
+}
+
+.chat-widget-messages li.error div {
+  background: #b30505;
+}
+
+.chat-widget-messages li.remote div {
+  background: #d2d4d9;
+  color: black;
+}
+
+.chat-widget-input {
+  border-top: 1px #E6E6E6 solid;
+  flex: 0 0;
+  height: 50px;
+}
+
+.chat-widget-input textarea {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 4px;
+}
+
