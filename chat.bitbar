@@ -5,5 +5,5 @@ echo ---
 date
 seconds=`echo $((\`ioreg -c IOHIDSystem | sed -e '/HIDIdleTime/ !{ d' -e 't' -e '}' -e 's/.* = //g' -e 'q'\` / 1000000000))`
 echo $seconds
-curl -X POST https://chat.pin13.net/chat/online -d seconds=$seconds >> /dev/null 2>&1
+curl -X POST https://chat.dev/chat/online -d seconds=$seconds >> /dev/null 2>&1
 
