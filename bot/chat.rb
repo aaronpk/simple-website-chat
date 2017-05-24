@@ -127,11 +127,17 @@ class API < Sinatra::Base
   # Pinged from the admin interface to indicate someone is available
   post '/online' do
     redis = Redis.new
-    last = redis.setex "#{$config['redis_prefix']}:last_admin_ping", 120, Time.now.to_i
-
-    {
-      result: "ok"
-    }.to_json
+    if params[:seconds].to_i < 120
+      last = redis.setex "#{$config['redis_prefix']}:last_admin_ping", 120, Time.now.to_i
+      {
+        result: "online"
+      }.to_json
+    else
+      redis.del "#{$config['redis_prefix']}:last_admin_ping"
+      {
+        result: "offline"
+      }.to_json    
+    end
   end
 
 end
