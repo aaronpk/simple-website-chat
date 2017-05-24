@@ -1,6 +1,6 @@
 (function(){
 
-  var base_url = "https://chat.dev";
+  var base_url = "https://chat.pin13.net";
   var config = {
     admin_name: "Aaron Parecki",
     status: base_url+"/chat/active",
@@ -197,48 +197,56 @@
     });
 
     // Request a chat session token or use the one that already exists
-    if(!currentChatToken()) {
+    if(currentChatToken()) {
+      loadMessageHistory();
+      listenForMessages(currentChatChannel());
+    }
+    document.querySelector(".chat-widget-input textarea").disabled = false;
+  }
+
+  function closeChatWidget() {
+    sendQuit();
+    localStorage.removeItem("chat-token");
+    localStorage.removeItem("chat-channel");
+    localStorage.removeItem("chat-history");
+    hideChatWidget();
+    showChatButton();
+  }
+
+  function getChatToken(callback) {
+    if(currentChatToken()) {
+      callback();
+    } else {
       get(config.login, function(response){
         if(response.token) {
           localStorage.setItem("chat-token", response.token);
           localStorage.setItem("chat-channel", response.channel);
           document.querySelector(".chat-widget-input textarea").disabled = false;
           listenForMessages(response.channel);
+          callback();
         }
       });
-    } else {
-      document.querySelector(".chat-widget-input textarea").disabled = false;
-      loadMessageHistory();
-      listenForMessages(currentChatChannel());
     }
   }
-
-  function closeChatWidget() {
-    localStorage.removeItem("chat-token");
-    localStorage.removeItem("chat-channel");
-    localStorage.removeItem("chat-history");
-    hideChatWidget();
-    showChatButton();
-    sendQuit();
-  }
-
+  
   function sendCurrentMessage() {
-    var input = document.querySelector(".chat-widget-input textarea");
-    var text = input.value;
-    input.value = "";
-
-    var li = appendMyMessage(text);
-
-    post(config.send, {
-      token: currentChatToken(),
-      text: text
-    }, function(response) {
-      li.classList.remove("pending");
-      addMessageToHistory("my", text);
-    }, function(err) {
-      li.classList.add("error");
+    getChatToken(function(){
+      var input = document.querySelector(".chat-widget-input textarea");
+      var text = input.value;
+      input.value = "";
+  
+      var li = appendMyMessage(text);
+  
+      post(config.send, {
+        token: currentChatToken(),
+        text: text
+      }, function(response) {
+        li.classList.remove("pending");
+        addMessageToHistory("my", text);
+      }, function(err) {
+        li.classList.add("error");
+      });      
     });
-
     return false;
   }
 

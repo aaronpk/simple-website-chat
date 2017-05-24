@@ -103,7 +103,7 @@ class API < Sinatra::Base
       return token
     end
 
-    $client.Channel(token[:channel]).send "Session ended"
+    $client.Channel(token[:channel]).send "[Chat window closed]"
 
     {
       result: "sent"
