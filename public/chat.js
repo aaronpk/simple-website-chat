@@ -72,7 +72,7 @@
       request.onerror = err;
     }
 
-    request.send();    
+    request.send();
   }
 
   ready(function(){
@@ -237,15 +237,15 @@
       });
     }
   }
-  
+
   function sendCurrentMessage() {
     getChatToken(function(){
       var input = document.querySelector(".chat-widget-input textarea");
       var text = input.value;
       input.value = "";
-  
+
       var li = appendMyMessage(text);
-  
+
       post(config.send, {
         token: currentChatToken(),
         text: text
@@ -254,7 +254,7 @@
         addMessageToHistory("my", text);
       }, function(err) {
         li.classList.add("error");
-      });      
+      });
     });
     return false;
   }
