@@ -38,13 +38,37 @@
   box-shadow: 0px 0px 4px rgba(0, 0, 0, .3);
   border-radius: 3px 3px 0px 0px;
   -moz-border-radius: 3px 3px 0px 0px;
-  -webkit-border-radius: 3px 3px 0px 0px;  
+  -webkit-border-radius: 3px 3px 0px 0px;
 
-  height: 300px;
   width: 240px;
+}
 
+.chat-widget-body {
+  height: 300px;
   display: flex;
   flex-direction: column;
+}
+
+.chat-widget.minimized {
+  height: auto;
+}
+
+.chat-widget.minimized .chat-widget-body {
+  display: none;
+}
+
+.chat-widget.minimized .close {
+  display: none;
+}
+
+.chat-widget-header .unread {
+  font-size: 12px;
+  padding: 0 6px;
+  background: #ff1a1a;
+  color: white;
+  border-radius: 12px;
+  vertical-align: middle;
+  cursor: pointer;
 }
 
 .chat-widget-header {

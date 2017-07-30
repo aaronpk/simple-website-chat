@@ -8,7 +8,9 @@
     send: base_url+"/chat/send",
     listen: base_url+"/streaming/sub",
     quit: base_url+"/chat/quit",
-    resumed: base_url+"/chat/resumed"
+    resumed: base_url+"/chat/resumed",
+    placeholder: "Type a message, press enter to send...",
+    welcome_message: "Hi visitor, tell me, who are you and what can I do for you?"
   };
 
   function ready(fn) {
@@ -70,7 +72,7 @@
       request.onerror = err;
     }
 
-    request.send();    
+    request.send();
   }
 
   ready(function(){
@@ -84,7 +86,7 @@
           hideChatButton();
         });
         document.body.appendChild(div);
-        if(localStorage.getItem("chat-history")) {
+        if(currentChatToken()) {
           showChatWidget();
           hideChatButton();
           sendResumed();
@@ -105,7 +107,36 @@
       var msg = JSON.parse(e.data);
       appendRemoteMessage(msg.data.nick, msg.data.text);
       addMessageToHistory("remote", msg.data.text);
+      if(document.querySelector('.chat-widget').classList.contains('minimized')) {
+        incrementUnreadCount();
+        showUnreadCount();
+      }
     }
+  }
+
+  function incrementUnreadCount() {
+    var unread = getState('unread');
+    if(unread) unread++;
+    else unread = 1;
+    setState('unread', unread);
+  }
+
+  function showUnreadCount() {
+    var unread = document.querySelector('.chat-widget .unread');
+    if (!unread) {
+      unread = document.createElement('span');
+      unread.classList.add('unread');
+      unread.innerText = getState('unread');
+      unread.addEventListener("click", function(evt){
+        evt.preventDefault();
+        toggleMinMaxChatWidget();
+      });
+      var right = document.querySelector('.chat-widget-header .right');
+      right.insertBefore(unread, right.firstChild);
+    } else {
+      unread.innerText = getState('unread');
+    }
+
   }
 
   function currentChatToken() {
@@ -157,9 +188,34 @@
     document.querySelector('.chat-button').classList.remove("hidden");
   }
 
+  function toggleMinMaxChatWidget() {
+    if(getState('minimized')) {
+      maximizeChatWidget();
+    } else {
+      minimizeChatWidget();
+    }
+  }
+
+  function minimizeChatWidget() {
+    setState('minimized', true);
+    document.querySelector('.chat-widget').classList.add("minimized");
+    document.querySelector(".chat-widget .minimize").innerHTML = '+';
+  }
+
+  function maximizeChatWidget() {
+    setState('minimized', false);
+    document.querySelector('.chat-widget').classList.remove("minimized");
+    document.querySelector(".chat-widget .minimize").innerHTML = '–';
+    var unread = document.querySelector('.chat-widget .unread');
+    if (unread) {
+      unread.parentNode.removeChild(unread);
+      setState('unread', null);
+    }
+  }
+
   function hideChatWidget() {
-    document.querySelector('.chat-widget').classList.add("hidden");
-    document.querySelector('.chat-widget').innerHTML = '';
+    var widget = document.querySelector('.chat-widget');
+    widget.parentNode.removeChild(widget);
   }
 
   function showChatWidget() {
@@ -172,15 +228,17 @@
           config.admin_name +
         '</span>' +
         '<span class="right">' +
+          '<a href="#" class="minimize">–</a>' +
           '<a href="#" class="close">&times;</a>' +
         '</span>' +
       '</div></div>' +
+      '<div class="chat-widget-body">' +
       '<div class="chat-widget-messages">' +
         '<ul></ul>' +
       '</div>' +
       '<div class="chat-widget-input">' +
-        '<textarea name="chat-widget-message" disabled placeholder="Type a message, press enter to send..."></textarea>'
-      '</div>'
+        '<textarea name="chat-widget-message" disabled placeholder="'+config.placeholder+'"></textarea>'
+      '</div></div>'
       ;
     document.body.appendChild(div);
     document.querySelector(".chat-widget-input textarea").addEventListener("keydown", function(evt){
@@ -196,19 +254,37 @@
       closeChatWidget();
     });
 
+    document.querySelector(".chat-widget .minimize").addEventListener("click", function(evt){
+      evt.preventDefault();
+      toggleMinMaxChatWidget();
+    });
+
     // Request a chat session token or use the one that already exists
     if(currentChatToken()) {
       loadMessageHistory();
       listenForMessages(currentChatChannel());
+      if(getState('minimized')) {
+        minimizeChatWidget();
+      }
+      if(getState('unread')) {
+        showUnreadCount();
+      }
+    } else if (config.welcome_message) {
+      // No chat session yet? Send a welcome message
+      setTimeout(function(){
+        localStorage.removeItem("chat-history");
+        appendRemoteMessage(null, config.welcome_message);
+        addMessageToHistory("remote", config.welcome_message);
+      }, 900);
     }
+
     document.querySelector(".chat-widget-input textarea").disabled = false;
   }
 
   function closeChatWidget() {
-    sendQuit();
-    localStorage.removeItem("chat-token");
-    localStorage.removeItem("chat-channel");
-    localStorage.removeItem("chat-history");
+    if(currentChatToken()) {
+      sendQuitAndDestroy();
+    }
     hideChatWidget();
     showChatButton();
   }
@@ -228,15 +304,28 @@
       });
     }
   }
-  
+
+  function getState(key) {
+    var state = JSON.parse(localStorage.getItem("chat-state"));
+    if(!state) return null;
+    return state[key];
+  }
+
+  function setState(key, value) {
+    var state = JSON.parse(localStorage.getItem("chat-state"));
+    if(!state) state = {};
+    state[key] = value;
+    localStorage.setItem("chat-state", JSON.stringify(state));
+  }
+
   function sendCurrentMessage() {
     getChatToken(function(){
       var input = document.querySelector(".chat-widget-input textarea");
       var text = input.value;
       input.value = "";
-  
+
       var li = appendMyMessage(text);
-  
+
       post(config.send, {
         token: currentChatToken(),
         text: text
@@ -245,7 +334,7 @@
         addMessageToHistory("my", text);
       }, function(err) {
         li.classList.add("error");
-      });      
+      });
     });
     return false;
   }
@@ -255,6 +344,17 @@
       token: currentChatToken()
     }, function(response){
 
+    });
+  }
+
+  function sendQuitAndDestroy() {
+    post(config.quit, {
+      token: currentChatToken()
+    }, function(response){
+      localStorage.removeItem("chat-token");
+      localStorage.removeItem("chat-channel");
+      localStorage.removeItem("chat-history");
+      localStorage.removeItem("chat-state");
     });
   }
 
