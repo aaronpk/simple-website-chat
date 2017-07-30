@@ -160,8 +160,8 @@
   }
 
   function hideChatWidget() {
-    document.querySelector('.chat-widget').classList.add("hidden");
-    document.querySelector('.chat-widget').innerHTML = '';
+    var widget = document.querySelector('.chat-widget');
+    widget.parentNode.removeChild(widget);
   }
 
   function showChatWidget() {
@@ -214,10 +214,9 @@
   }
 
   function closeChatWidget() {
-    sendQuit();
-    localStorage.removeItem("chat-token");
-    localStorage.removeItem("chat-channel");
-    localStorage.removeItem("chat-history");
+    if(currentChatToken()) {
+      sendQuit();
+    }
     hideChatWidget();
     showChatButton();
   }
@@ -263,7 +262,9 @@
     post(config.quit, {
       token: currentChatToken()
     }, function(response){
-
+      localStorage.removeItem("chat-token");
+      localStorage.removeItem("chat-channel");
+      localStorage.removeItem("chat-history");
     });
   }
 
