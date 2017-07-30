@@ -109,16 +109,24 @@
       addMessageToHistory("remote", msg.data.text);
       if(document.querySelector('.chat-widget').classList.contains('minimized')) {
         incrementUnreadCount();
+        showUnreadCount();
       }
     }
   }
 
   function incrementUnreadCount() {
+    var unread = getState('unread');
+    if(unread) unread++;
+    else unread = 1;
+    setState('unread', unread);
+  }
+
+  function showUnreadCount() {
     var unread = document.querySelector('.chat-widget .unread');
     if (!unread) {
       unread = document.createElement('span');
       unread.classList.add('unread');
-      unread.innerText = 1;
+      unread.innerText = getState('unread');
       unread.addEventListener("click", function(evt){
         evt.preventDefault();
         toggleMinMaxChatWidget();
@@ -126,8 +134,9 @@
       var right = document.querySelector('.chat-widget-header .right');
       right.insertBefore(unread, right.firstChild);
     } else {
-      unread.innerText = parseInt(unread.innerText) + 1;
+      unread.innerText = getState('unread');
     }
+
   }
 
   function currentChatToken() {
@@ -180,24 +189,28 @@
   }
 
   function toggleMinMaxChatWidget() {
-      var button = document.querySelector(".chat-widget .minimize");
-      if (button.innerHTML == '–') {
-        button.innerHTML = '+';
-        minimizeChatWidget();
-      } else {
-        button.innerHTML = '–';
-        maximizeChatWidget();
-      }
+    if(getState('minimized')) {
+      maximizeChatWidget();
+    } else {
+      minimizeChatWidget();
+    }
   }
 
   function minimizeChatWidget() {
+    setState('minimized', true);
     document.querySelector('.chat-widget').classList.add("minimized");
+    document.querySelector(".chat-widget .minimize").innerHTML = '+';
   }
 
   function maximizeChatWidget() {
+    setState('minimized', false);
     document.querySelector('.chat-widget').classList.remove("minimized");
+    document.querySelector(".chat-widget .minimize").innerHTML = '–';
     var unread = document.querySelector('.chat-widget .unread');
-    if (unread) unread.parentNode.removeChild(unread);
+    if (unread) {
+      unread.parentNode.removeChild(unread);
+      setState('unread', null);
+    }
   }
 
   function hideChatWidget() {
@@ -250,6 +263,12 @@
     if(currentChatToken()) {
       loadMessageHistory();
       listenForMessages(currentChatChannel());
+      if(getState('minimized')) {
+        minimizeChatWidget();
+      }
+      if(getState('unread')) {
+        showUnreadCount();
+      }
     } else if (config.welcome_message) {
       // No chat session yet? Send a welcome message
       setTimeout(function(){
@@ -263,7 +282,7 @@
 
   function closeChatWidget() {
     if(currentChatToken()) {
-      sendQuit();
+      sendQuitAndDestroy();
     }
     hideChatWidget();
     showChatButton();
@@ -283,6 +302,19 @@
         }
       });
     }
+  }
+
+  function getState(key) {
+    var state = JSON.parse(localStorage.getItem("chat-state"));
+    if(!state) return null;
+    return state[key];
+  }
+
+  function setState(key, value) {
+    var state = JSON.parse(localStorage.getItem("chat-state"));
+    if(!state) state = {};
+    state[key] = value;
+    localStorage.setItem("chat-state", JSON.stringify(state));
   }
 
   function sendCurrentMessage() {
@@ -310,9 +342,18 @@
     post(config.quit, {
       token: currentChatToken()
     }, function(response){
+
+    });
+  }
+
+  function sendQuitAndDestroy() {
+    post(config.quit, {
+      token: currentChatToken()
+    }, function(response){
       localStorage.removeItem("chat-token");
       localStorage.removeItem("chat-channel");
       localStorage.removeItem("chat-history");
+      localStorage.removeItem("chat-state");
     });
   }
 
