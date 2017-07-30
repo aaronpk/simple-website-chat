@@ -86,7 +86,7 @@
           hideChatButton();
         });
         document.body.appendChild(div);
-        if(localStorage.getItem("chat-history")) {
+        if(currentChatToken()) {
           showChatWidget();
           hideChatButton();
           sendResumed();
@@ -272,6 +272,7 @@
     } else if (config.welcome_message) {
       // No chat session yet? Send a welcome message
       setTimeout(function(){
+        localStorage.removeItem("chat-history");
         appendRemoteMessage(null, config.welcome_message);
         addMessageToHistory("remote", config.welcome_message);
       }, 900);
