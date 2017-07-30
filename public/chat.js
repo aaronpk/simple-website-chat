@@ -107,6 +107,26 @@
       var msg = JSON.parse(e.data);
       appendRemoteMessage(msg.data.nick, msg.data.text);
       addMessageToHistory("remote", msg.data.text);
+      if(document.querySelector('.chat-widget').classList.contains('minimized')) {
+        incrementUnreadCount();
+      }
+    }
+  }
+
+  function incrementUnreadCount() {
+    var unread = document.querySelector('.chat-widget .unread');
+    if (!unread) {
+      unread = document.createElement('span');
+      unread.classList.add('unread');
+      unread.innerText = 1;
+      unread.addEventListener("click", function(evt){
+        evt.preventDefault();
+        toggleMinMaxChatWidget();
+      });
+      var right = document.querySelector('.chat-widget-header .right');
+      right.insertBefore(unread, right.firstChild);
+    } else {
+      unread.innerText = parseInt(unread.innerText) + 1;
     }
   }
 
@@ -159,6 +179,27 @@
     document.querySelector('.chat-button').classList.remove("hidden");
   }
 
+  function toggleMinMaxChatWidget() {
+      var button = document.querySelector(".chat-widget .minimize");
+      if (button.innerHTML == '–') {
+        button.innerHTML = '+';
+        minimizeChatWidget();
+      } else {
+        button.innerHTML = '–';
+        maximizeChatWidget();
+      }
+  }
+
+  function minimizeChatWidget() {
+    document.querySelector('.chat-widget').classList.add("minimized");
+  }
+
+  function maximizeChatWidget() {
+    document.querySelector('.chat-widget').classList.remove("minimized");
+    var unread = document.querySelector('.chat-widget .unread');
+    if (unread) unread.parentNode.removeChild(unread);
+  }
+
   function hideChatWidget() {
     var widget = document.querySelector('.chat-widget');
     widget.parentNode.removeChild(widget);
@@ -174,15 +215,17 @@
           config.admin_name +
         '</span>' +
         '<span class="right">' +
+          '<a href="#" class="minimize">–</a>' +
           '<a href="#" class="close">&times;</a>' +
         '</span>' +
       '</div></div>' +
+      '<div class="chat-widget-body">' +
       '<div class="chat-widget-messages">' +
         '<ul></ul>' +
       '</div>' +
       '<div class="chat-widget-input">' +
         '<textarea name="chat-widget-message" disabled placeholder="'+config.placeholder+'"></textarea>'
-      '</div>'
+      '</div></div>'
       ;
     document.body.appendChild(div);
     document.querySelector(".chat-widget-input textarea").addEventListener("keydown", function(evt){
@@ -196,6 +239,11 @@
     document.querySelector(".chat-widget .close").addEventListener("click", function(evt){
       evt.preventDefault();
       closeChatWidget();
+    });
+
+    document.querySelector(".chat-widget .minimize").addEventListener("click", function(evt){
+      evt.preventDefault();
+      toggleMinMaxChatWidget();
     });
 
     // Request a chat session token or use the one that already exists
