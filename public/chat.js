@@ -8,7 +8,9 @@
     send: base_url+"/chat/send",
     listen: base_url+"/streaming/sub",
     quit: base_url+"/chat/quit",
-    resumed: base_url+"/chat/resumed"
+    resumed: base_url+"/chat/resumed",
+    placeholder: "Type a message, press enter to send...",
+    welcome_message: "Hi visitor, tell me, who are you and what can I do for you?"
   };
 
   function ready(fn) {
@@ -179,7 +181,7 @@
         '<ul></ul>' +
       '</div>' +
       '<div class="chat-widget-input">' +
-        '<textarea name="chat-widget-message" disabled placeholder="Type a message, press enter to send..."></textarea>'
+        '<textarea name="chat-widget-message" disabled placeholder="'+config.placeholder+'"></textarea>'
       '</div>'
       ;
     document.body.appendChild(div);
@@ -200,7 +202,14 @@
     if(currentChatToken()) {
       loadMessageHistory();
       listenForMessages(currentChatChannel());
+    } else if (config.welcome_message) {
+      // No chat session yet? Send a welcome message
+      setTimeout(function(){
+        appendRemoteMessage(null, config.welcome_message);
+        addMessageToHistory("remote", config.welcome_message);
+      }, 900);
     }
+
     document.querySelector(".chat-widget-input textarea").disabled = false;
   }
 
